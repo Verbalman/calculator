@@ -1,0 +1,30 @@
+{
+  "name": "calculator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/calculator.umd.cjs",
+  "module": "./dist/calculator.js",
+  "exports": {
+    ".": {
+      "import": "./dist/calculator.js",
+      "require": "./dist/calculator.umd.cjs",
+      "script": "./dist/calculator.iife.js"
+    },
+    "./dist/*.css": {
+      "import": "./dist/*.css",
+      "require": "./dist/*.css",
+      "style": "./dist/*.css"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  }
+}
