@@ -19,9 +19,21 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
       case '+/-':
         console.log('plus-minus');
         break;
-      case "%":
-        console.log('percent');
+      case "%": {
+        isMark = true;
+
+        if (buffer.length) {
+          buffer.push(key);
+
+          const calculationResult = CalculationService(buffer, key);
+          console.log('calculationResult =>', calculationResult);
+
+          history[history.length - 1] = `(${history[history.length - 1]}${key})`;
+          displayEl.innerText = calculationResult.toString();
+        }
+
         break;
+      }
       case "NumpadDecimal":
       case ".":
       case ",":
@@ -32,22 +44,24 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
         isMark = false;
         let equalRes = '';
 
-        if (buffer.length === 2) {
+        if (buffer.length === 2 && buffer[1] !== '%') {
           buffer.push(buffer[0]);
           history.push(buffer[0]);
         }
 
-        if (buffer.length >= 3) {
+        if (buffer.length >= 3 || (buffer.length === 2 && buffer[1] === '%')) {
           const calculationResult = CalculationService(buffer, key);
           equalRes = calculationResult.toString();
-          console.log('calculation:', equalRes);
+          console.log('= calculation:', equalRes);
 
           buffer = [];
           buffer.push(equalRes);
           displayEl.innerText = equalRes.toString();
         }
 
-        history.push(key + equalRes.toString());
+        if (history[history.length - 1] !== key) {
+          history.push(key + equalRes.toString());
+        }
         break;
       }
 
@@ -57,19 +71,23 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
       case "+": {
         isMark = true;
 
-        // replace operator
-        if (operatorsArray.includes(buffer[buffer.length - 1])) {
-          buffer[buffer.length - 1] = key;
-          history[history.length - 1] = key;
-          break;
+        if (buffer.length) {
+
+          // replace operator
+          if (operatorsArray.includes(buffer[buffer.length - 1])) {
+            buffer[buffer.length - 1] = key;
+            history[history.length - 1] = key;
+            break;
+          }
+
+          const calculationResult = CalculationService(buffer, key);
+          console.log('calculation:', calculationResult);
+          displayEl.innerText = calculationResult || buffer[0];
+
+          buffer.push(key);
+          history.push(key);
         }
 
-        const calculationResult = CalculationService(buffer, key);
-        console.log('calculation:', calculationResult);
-        displayEl.innerText = calculationResult || buffer[0];
-
-        buffer.push(key);
-        history.push(key);
         break;
       }
 
@@ -108,6 +126,7 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
 
     historyEl.innerText = history.join('');
 
+    // console.log('history:', history);
     console.log('buffer:', buffer);
   };
 
