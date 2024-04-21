@@ -11,6 +11,6 @@ In progress...
 - [ ] Calculator '.' logic
 - [ ] Calculator '+/-' logic
 - [ ] Calculator history brackets for multiply and divide
-- [ ] Calculator divide by zero
 - [ ] Calculator handle errors
 - [ ] Calculator action buttons enum
+- [ ] % check duplicate

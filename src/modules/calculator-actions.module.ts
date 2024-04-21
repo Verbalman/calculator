@@ -1,5 +1,6 @@
 import { ButtonsModel } from "../model/buttons.model.ts";
-import { CalculationService } from "../services/calculation.service.ts";
+import { Calculation } from "../services/calculation.service.ts";
+import { Button } from "../components/button.ts";
 
 export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTMLDivElement, historyEl: HTMLDivElement): void {
   let buffer: string[] = [];
@@ -25,10 +26,13 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
         if (buffer.length) {
           buffer.push(key);
 
-          const calculationResult = CalculationService(buffer, key);
-          console.log('calculationResult =>', calculationResult);
+          const calculationResult = Calculation(buffer, key);
 
-          history[history.length - 1] = `(${history[history.length - 1]}${key})`;
+          const lastVal = history[history.length - 1]
+          history[history.length - 1] = '(';
+          history.push(lastVal);
+          history.push(key);
+          history.push(')');
           displayEl.innerText = calculationResult.toString();
         }
 
@@ -50,9 +54,8 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
         }
 
         if (buffer.length >= 3 || (buffer.length === 2 && buffer[1] === '%')) {
-          const calculationResult = CalculationService(buffer, key);
+          const calculationResult = Calculation(buffer, key);
           equalRes = calculationResult.toString();
-          console.log('= calculation:', equalRes);
 
           buffer = [];
           buffer.push(equalRes);
@@ -60,7 +63,8 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
         }
 
         if (history[history.length - 1] !== key) {
-          history.push(key + equalRes.toString());
+          history.push(key);
+          history.push(equalRes.toString());
         }
         break;
       }
@@ -80,8 +84,7 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
             break;
           }
 
-          const calculationResult = CalculationService(buffer, key);
-          console.log('calculation:', calculationResult);
+          const calculationResult = Calculation(buffer, key);
           displayEl.innerText = calculationResult || buffer[0];
 
           buffer.push(key);
@@ -127,23 +130,15 @@ export function CalculatorActionsModule(parentEl: HTMLDivElement, displayEl: HTM
     historyEl.innerText = history.join('');
 
     // console.log('history:', history);
-    console.log('buffer:', buffer);
+    // console.log('buffer:', buffer);
   };
 
-  const fragment = ButtonsModel.map((item) => {
-    const gridArea = `grid-area: ${item.key}`;
-    return `<button 
-      type="button" 
-      class="calculator-button ${item.className}" 
-      value="${item.value}" 
-      style="${gridArea}"
-    >${item.label}</button>`;
-  }).join('');
-  const buttonsElList = document.createRange().createContextualFragment(fragment);
+  const buttonsElList = document.createRange().createContextualFragment(ButtonsModel.map(Button).join(''));
+
   buttonsElList.querySelectorAll('button').forEach((el) => {
     el.addEventListener('click', (event: MouseEvent) => checkAction((event.target as HTMLButtonElement).value));
   });
-  parentEl.appendChild(buttonsElList);
-
   window.addEventListener('keypress', (event: KeyboardEvent) => checkAction(event.key));
+
+  parentEl.appendChild(buttonsElList);
 }
